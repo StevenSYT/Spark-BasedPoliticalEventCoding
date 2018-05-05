@@ -4,7 +4,7 @@ from pyspark import sql
 from pyspark.sql import SparkSession
 from petrarch2 import petrarch2
 
-conf = SparkConf().setAppName("newsExtraction").setMaster("local[4]")
+conf = SparkConf().setAppName("newsExtraction").setMaster("local[3]")
 conf.set("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.11:2.2.2")
 
 sc = SparkContext(conf=conf)
@@ -24,7 +24,7 @@ mongoRDD = df.rdd
 
 def eventCoding(doc):
     # doc[2] = "CNA_ENG_19971001.0001"
-    docMeta = doc['id'].split("_")
+    docMeta = doc['ID'].split("_")
     source = docMeta[0]
     doc_id = docMeta[0] + docMeta[2]
     date = docMeta[2].split(".")[0]

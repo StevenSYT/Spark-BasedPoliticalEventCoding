@@ -22,7 +22,7 @@ my_spark = SparkSession \
     .config("spark.mongodb.input.uri", "mongodb://127.0.0.1/test.coll") \
     .config("spark.mongodb.output.uri", "mongodb://127.0.0.1/test.coll") \
     .getOrCreate()
-    
+
 newsRdd = sc.textFile("out.xml")
 def extractMeta(line):
     root = ET.fromstring(line)
@@ -34,12 +34,17 @@ def extractMeta(line):
         if(child.tag != "TEXT"):
             record.update({child.tag: child.text})
     for p in root.iter('P'):
-        oriText += (p.text + " ")
+        if p.text is not None:
+            oriText += (p.text + " ")
+    if not (isinstance(oriText, basestring) and len(oriText) > 0):
+        return 0
     output = nlp.annotate(oriText, properties={
     # 'annotators': 'tokenize,ssplit,sentiment,depparse,parse',
     'annotators': 'tokenize, parse, ssplit',
     'outputFormat': 'json'
     })
+    if not isinstance(output, dict):
+        return 0
     for sentenceDict in output['sentences']:
         sentence  = ""
         for token in sentenceDict['tokens']:
@@ -52,10 +57,10 @@ def extractMeta(line):
         output['sentences'][currentIndex] = result
     record.update(output)
     return record
-record = newsRdd.map(extractMeta)
+records = newsRdd.map(extractMeta).filter(lambda x: x)
 
-recordDF = record.toDF()
+recordsDF = records.toDF()
+recordsDF.show()
 
-recordDF.write.format("com.mongodb.spark.sql.DefaultSource").mode("append").option("database",
+recordsDF.write.format("com.mongodb.spark.sql.DefaultSource").mode("append").option("database",
 "political_event").option("collection", "records").save()
-recordDF.show()

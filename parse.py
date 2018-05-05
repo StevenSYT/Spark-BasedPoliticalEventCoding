@@ -1,11 +1,12 @@
 from lxml import etree
+
 parser = etree.XMLParser(remove_blank_text=True)
 
 
-with open("data.html", "r") as inputFile:
+with open("cna_eng_199709.xml", "r") as inputFile:
   fileContent = inputFile.read()
   # root = ET.fromstring("<fake>" + fileContent +"</fake>")
-  root = etree.XML("<fake>" + fileContent +"</fake>", parser=parser)
+  root = etree.XML(fileContent, parser=parser)
 
   with open("out.xml", "w") as outputFile:
       for child in root:
