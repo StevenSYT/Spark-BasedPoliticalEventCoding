@@ -11,6 +11,7 @@ with open("data.html", "r") as inputFile:
       for child in root:
           out = etree.tostring(child).replace("\n","")
           outputFile.write(out+"\n")
+          print(child)
 
 # xml = open('out.xml').read()
 #
